@@ -1,0 +1,90 @@
+MIT License
+
+Copyright (c) 2025 Bruce Industries Forensics Simulation Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Educational Use Disclaimer
+
+This project contains educational material about security vulnerabilities and
+attack techniques. The scripts, documentation, and examples provided are for:
+
+✓ AUTHORIZED USE ONLY
+✓ Educational and training purposes
+✓ Security research in controlled environments
+✓ Improving defensive security capabilities
+
+✗ DO NOT USE FOR
+✗ Unauthorized access to computer systems
+✗ Any illegal activities
+✗ Causing harm or damage
+
+Unauthorized access to computer systems violates laws including but not limited to:
+- Computer Fraud and Abuse Act (CFAA) - 18 U.S.C. § 1030 (United States)
+- Computer Misuse Act 1990 (United Kingdom)
+- Similar cybercrime laws in other jurisdictions
+
+Users of this software are solely responsible for ensuring their use complies
+with all applicable laws and regulations.
+
+## Security Research Ethics
+
+When conducting security research:
+1. Always obtain explicit written authorization
+2. Define clear scope and boundaries
+3. Report vulnerabilities responsibly
+4. Respect privacy and confidentiality
+5. Cause no harm to systems or data
+
+For more information on responsible disclosure:
+- https://www.cisa.gov/coordinated-vulnerability-disclosure-process
+- https://www.iso.org/standard/72311.html (ISO/IEC 29147)
+
+## Data Privacy Notice
+
+All employee data, Social Security Numbers, and personal information shown in
+this simulation are ENTIRELY FICTIONAL. No real individuals were involved, and
+all data was created specifically for educational purposes.
+
+This project respects data privacy laws including:
+- GDPR (General Data Protection Regulation)
+- CCPA (California Consumer Privacy Act)
+- HIPAA (Health Insurance Portability and Accountability Act)
+- Other applicable privacy regulations
+
+## Attribution
+
+This educational project was created as part of a digital forensics training
+program. While based on realistic attack scenarios, all events, companies, and
+individuals are simulated for educational purposes only.
+
+If you use this material in your own training or presentations:
+- Provide attribution to this repository
+- Maintain all disclaimer and educational use notices
+- Ensure your use also complies with educational purposes
+
+## Contact & Responsible Disclosure
+
+If you discover any issues with the educational content or have suggestions
+for improvement, please open an issue in this repository.
+
+For security concerns about the educational materials themselves, please
+contact the repository maintainers privately before public disclosure.

